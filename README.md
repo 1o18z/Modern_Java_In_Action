@@ -37,7 +37,8 @@
 
 
 |챕터|날짜|링크|발표자|질문|
-|:---:|:---:|:---:|:---:|:---:|
+|:--:|:---:|:---:|:---:|:---:|
 |1장|2023.4.8|[자바 8, 9, 10, 11 : 무슨 일이 일어나고 있는가?](https://github.com/tdronnie/Modern_Java_In_Action/blob/e90402136189788ebcabc71a3836c31013b97ca9/1%EC%9E%A5/%EC%9D%B4%EC%84%B8%EC%9D%80_1%EC%9E%A5.md)|[tdronnie](https://github.com/tdronnie)||
 |2장|2023.4.15|[동작 파라미터화 코드 전달하기](https://github.com/1o18z/Modern_Java_In_Action/blob/main/%EA%B9%80%ED%83%9C%EC%A4%80/2%EC%9E%A5.md)|[xowns4817](https://github.com/xowns4817)||
 |3장(1)|2023.4.22|[람다 표현식](https://github.com/1o18z/Modern_Java_In_Action/blob/main/%EA%B9%80%ED%83%9C%EC%A4%80/3%EC%9E%A5.md)|[xowns4817](https://github.com/xowns4817)|1. 표현식과 구문의 차이는?<br> 2. 함수 디스크립터와 시그니처의 차이는?<br> 3. 제네릭 내부 구현 때문에 제네릭 파라미터는 참조형일 때만 사용 가능하다 -> 왜?|
+|3장(2)|2023.4.29|[람다 표현식](https://github.com/tdronnie/Modern_Java_In_Action/blob/main/%EC%9D%B4%EC%84%B8%EC%9D%80/3%EC%9E%A5_%EB%9E%8C%EB%8B%A4_%ED%91%9C%ED%98%84%EC%8B%9D%232.md)|[tdronnie](https://github.com/tdronnie)|1. 메서드참조 수준의 추상화에서 성능이슈?<br> 2. 기존 객체의 인스턴스 메서드참조 이해하기<br> 3. 생성자 참조시 어떻게 new키워드로만 가능할까?|
