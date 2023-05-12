@@ -165,9 +165,8 @@ List<Integer> wordLengths = words.stream()
 ```
 - p.163 그림 5-5 설명
 
-
 ### map과 Array.stream 활용
-- 배열 대신 문자열 스트림이 필요하다.
+- 배열 스트림 대신 문자열 스트림이 필요하다. 
 - 문자열을 받아 스트림을 만드는 Arrays.stream()을 사용할 수 있지 않을까?
 ```java
 String[ ] arrayOfWords = {"Goodbye", "World"};
@@ -175,7 +174,7 @@ Stream<String> streamOfWords = Arrays.stream(arrayOfWords);
 ```
 
 - 위 예제에 적용해 보자 
-- 잘못된 소스 case 2 -> 잘 이해 안됨
+- 잘못된 소스 case 2
 ```java
  word.stream()
      .map(word -> word.split("")) // Stream<String[ ]>
@@ -184,13 +183,13 @@ Stream<String> streamOfWords = Arrays.stream(arrayOfWords);
      .collect(toList());
 ```
 
-- 문제를 해결하려면 단어를 개별 문자배열로 만들고 각 배열을 별도의 스트림으로 만들어야 한다.
+- 문제를 해결하려면 단어를 개별 문자배열로 만들고 각 배열을 별도의 스트림으로 만들어야 한다.(Stream<String>)
 
 ### flatMap 사용
 ```java
 List<String> uniqueCharacters = 
           words.stream()
-              .map(word -> word.split(""))
+              .map(word -> word.split("")) // Stream<String[]> 
               .flatMap(Arrays::stream)  // 생성된 스트림을 하나의 스트림으로 평면화
               .distinct()
               .collect(toList());
