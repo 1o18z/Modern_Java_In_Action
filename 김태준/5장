@@ -1,0 +1,342 @@
+# chapter 5. 스트림mark 활용
+> 이 장에서 다룰 내용
+> > 필터링, 슬라이싱, 매칭
+> > 검색, 매칭, 리듀싱
+> > 특정 범위의 숫자와 같은 숫자 스트림 사용하기
+> > 다중 소스로부터 스트림 만들기
+> > 무한 스트림
+
+
+- 4장에서 **외부 반복**과 **내부 반복**에 대해 살펴봤다.
+- 외부 반복
+```java
+List<Dish> vegetarianDished = new ArrayList<>();
+for(Dish d: menu) {
+    if(d.isVegetarian()) {
+        vegetarianDished.add(d);
+    }
+}
+```
+
+- 내부 반복 : 데이터를 어떻게 처리할지는 스트림 API가 관리하므로 편리하게 데이터 관련 작업을 할 수 있다.
+```java
+import static java.util.stream.Collectors.toList;
+List<Dish> vegetarianDished = 
+        menu.stream()
+            .filter(Dish::isVegetarian)
+            .collect(toList());
+```
+
+- 스트림 API가 지원하는 연산을 이용해서 필터링, 슬라이싱, 매핑, 검색, 매칭, 리듀싱 등 다양한 데이터 처리 질의를 표현할 수 있다.
+
+## 5.1 필터링
+### 5.1.1 프레디케이트로 필터링
+- filter 메서드는 **프레디케이트**(불리언을 반환하는 함수)를 인수로 받아서 프레디케이트와 일치하는 모든 요소를 포함하는 스트림을 반환한다.
+
+```java
+List<Dish> vegetarianMenu = menu.stream()
+                                .filter(Dish::isVegetarian)  <- 채식 요리인지 확인하는 메서드 참조
+                                .collect(toList());
+```
+- p.157 그림 5-1 설명
+
+### 5.1.2 고유 요소 필터링
+- 스트림은 고유 요소로 이루어진 스트림을 반환하는 distinct 메서드도 지원한다.(고유 여부는 스트림에서 만든 객체의 hashCode, equals로 결정된다.)
+
+```java
+List<Integer> numbers = Arrays.asList(1, 2, 1, 3, 3, 2, 4);
+numbers.stream()
+        .filter(i -> i % 2 == 0)
+        .distinct()
+        .forEach(System.out::println);
+```
+- p.157 그림 5-2 설명
+
+
+## 5.2 스트림 슬라이싱
+ - 5.2 절에서는 스트림의 요소를 선택하거나 스킵하는 다양한 방법을 설명한다.(프레디케이트를 이용하는 방법, 스트림의 처음 몇 개의 요소를 무시하는 방법, 특정 크기로 스트림을 줄이는 방법)
+
+ ### 5.2.1 프레디케이트를 이용한 슬라이싱
+ - 자바 9는 스트림의 요소를 효과적으로 선택할 수 있도록 takeWhile, dropWhile 두 가지 새로운 메서드를 지원한다.
+
+ ### TAKEWHILE 활용
+  - 요리 목록
+  ```java
+  List<Dish> specialMenu = Arrays.asList(
+    new Dish("seasonal fruit", true, 120, Dish.Type.OTHER),
+    new Dish("prawns", false, 300, Dish.Type.FISH),
+    new Dish("rice", true, 350, Dish.Type.OTHER),
+    new Dish("chicken", false, 400, Dish.Type.MEAT),
+    new Dish("french fries", true, 530, Dish.Type.OTHER)
+  )
+  ```
+  - 320 칼로리 이하의 요리 선택 방법
+  > filter 사용
+  ```java
+  List<Dish> filteredMenu
+        = specialMenu.stream()
+                      .filter(dish -> dish.getCalories() < 320)
+                      .collect(toList()); // "seasonal fruit, prawns"
+  ```
+
+  - filter를 사용하면 전체 스트림을 반복하면서 각 요소에 프레디케이트를 적용한다.
+  - 칼로리 순으로 이미 리스트가 정렬되어 있다면 ? -> **takeWhile**을 사용하자 (해당 지점까지 만 비교하고 끝) -> **만약, 정렬 안되어있으면 거기까지 출력?**
+  ```java
+  List<Dish> slicedMenu1
+        = specialMenu.stream()
+            .takeWhile(dish -> dish.getCalories() < 320)
+            .collect(toList()); // "seasonal fruit, prawns"
+        
+  ```
+
+### DROPWHILE 활용
+- 320 칼로리보다 큰 요소를 탐색하려면 ? -> **dropWhile**을 사용하자
+```java
+ List<Dish> sliceMenu2
+   = specialMenu.stream()
+                .dropWhile(dish -> dish.getCalories() < 320)
+                .collect(toList()); // rice, chicken, french fries
+```
+
+- dropWhile은 takeWhile과 정반대의 작업 수행
+
+### 5.2.2 스트림 축소
+- 스트림은 주어진 값 이하의 크기를 갖는 새로운 스트림을 반환하는 limit(n) 메서드를 지원한다. (**앞에부터 차례로 짤림**)
+```java
+ // 300칼로리 이상의 세 요리를 선택해 리스트 생성
+ List<Dish> dishes = specialMenu.stream()
+                                .filter(dish -> dish.getCalories() > 300)
+                                .limit(3)
+                                .collect(toList()); // rice, chicken, french fries
+```
+
+### 5.2.3 요소 건너뛰기
+- 스트림은 처음 n개 요소를 제외한 스트림을 반환하는 skip(n) 메서드를 지원한다.(n개 이하의 요소를 포함하는 스트림에 skip(n)을 호출하면 빈 스트림이 반환된다.)
+- p. 161 그림 5-4 참고
+```java
+List<Dish> dished = menu.stream()
+                        .filter(d -> d.getCalories() > 300)
+                        .skip(2)
+                        .collect(toList());
+```
+
+
+## 5.3 매핑
+- 스트림 API의 map과 flatMap 메서드는 특정 데이터를 선택하는 기능을 제공한다.
+
+### 5.3.1 스트림의 각 요소의 함수 적용하기
+- 스트림은 함수를 인수로 받는 map 메서드를 지원한다.
+- 인수로 제공된 함수는 각 요소에 적용되며 함수를 적용한 결과가 새로운 요소로 매핑된다.(기존값의 변화가 아닌 새로운 값을 만든다 -> 매핑이라는 단어 사용)
+> Dish::getName을 map 메서드로 전달해서 스트림의 요리명 추출
+```java
+List<String> dishNames = menu.stream()
+                            .map(Dish::getName)
+                            .collect(toList());
+```
+
+> 요리명의 길이를 알고 싶다면?
+
+```java
+List<String> dishNames = menu.stream()
+                            .map(Dish::getName) // Stream<String>
+                            .map(String::length) // Stream<Integer>
+                            .collect(toList());
+```
+
+- getName은 문자열을 반환하므로 map 메서드의 출력 스트림은 Stream<String> 형식을 갖는다.
+
+> 단어 리스트가 주어졌을 때 각 단어가 포함하는 글자 수의 리스트 반환
+```java
+List<String> words = Arrays.asList("Modern", "Java", "In", "Action");
+List<Integer> wordLengths = words.stream()
+                                  .map(String::length) // (s -> s.length)
+                                  .collect(toList());
+```
+
+### 5.3.2 스트림 평면화
+- 리스트에서 **고유 문자**로 이루어진 리스트를 반환. 예를들어 ["Hello", "World"] 리스트가 있다면 결과로 ["H", "e", "l", "o", "W", "r", "d"]를 포함한 리스트가 반환되어야 한다.
+
+- 잘못된 소스 case 1
+```java
+ words.stream()
+       .map(word -> word.split(""))  // string -> string[ ] => Stream<String[]>
+       .distinct()
+       .collect(toList());
+```
+- p.163 그림 5-5 설명
+
+
+### map과 Array.stream 활용
+- 배열 대신 문자열 스트림이 필요하다.
+- 문자열을 받아 스트림을 만드는 Arrays.stream()을 사용할 수 있지 않을까?
+```java
+String[ ] arrayOfWords = {"Goodbye", "World"};
+Stream<String> streamOfWords = Arrays.stream(arrayOfWords);
+```
+
+- 위 예제에 적용해 보자 
+- 잘못된 소스 case 2 -> 잘 이해 안됨
+```java
+ word.stream()
+     .map(word -> word.split("")) // Stream<String[ ]>
+     .map(Arrays::stream) // List<Stream<String>> // 각 배열을 별도의 스트림으로 생성
+     .distinct()
+     .collect(toList());
+```
+
+- 문제를 해결하려면 단어를 개별 문자배열로 만들고 각 배열을 별도의 스트림으로 만들어야 한다.
+
+### flatMap 사용
+```java
+List<String> uniqueCharacters = 
+          words.stream()
+              .map(word -> word.split(""))
+              .flatMap(Arrays::stream)  // 생성된 스트림을 하나의 스트림으로 평면화
+              .distinct()
+              .collect(toList());
+```
+- flatMap은 각 배열을 스트림이 아니라 스트림의 콘텐츠로 매핑한다.
+- 즉, map(Arrays:stream)과 달리 flatMap은 하나의 평면화된 스트림을 반환한다.
+- p.163 그림 5-5(map)과 p.165 그림 5-6(flatMap) 비교
+- p.166 퀴즈 1~3 풀어보기
+
+## 5.4 검색과 매칭
+- 스트림 API는 allMatch, anyMatch, noneMatch, findFirst, findAny 등 다양한 유틸리티 메서드를 제공한다.
+
+### 5.4.1 프레디케이트가 적어도 한 요소와 일치하는지 확인
+- anyMatch 사용 (anyMatch는 불리언을 반환하므로 최종 연산이다.)
+> menu에 채식요리가 있는지 확인
+```java
+if(menu.stream().anyMatch(Dish::isVegetarian)) {
+  System.out.println("The menu is (somewhat) vegetarian friendly!!");
+}
+```
+
+### 5.4.2 프레디케이트가 모든 요소와 일치하는지 검사
+- allMatch 사용
+> 모든 요리가 1000칼로리 이하인지 확인
+```java
+boolean isHealthy = menu.stream()
+                        .allMatch(dish -> dish.getCalories() < 1000);
+```
+
+### NONEMATCH
+- allMatch와 반대 연산을 수행한다. 즉, 주어진 프레디케이트와 일치하는 요소가 없는지 확인(일치하는게 하나도 없을때 true)
+
+```java
+boolean isHealthy = menu.stream()
+                        .noneMatch(dish -> dish.getCalories() >= 1000);
+```
+
+- anyMatch, allMatch, noneMatch 세 메서드는 스트림 **쇼트서킷** 기법, 즉, 자바의 &&, || 와 같은 연산을 활용한다.
+> **쇼트 서킷** : and 연산의 경우 앞이 false이면 나머지 결과와 관계없이 false => 이러한 상황을 **쇼크 서킷**이라고 부른다. allMatch, noneMatch, findFirst, findAny 등의 연산은 모든 스트림의 요소를 처리하지 않고도 결과를 반환할 수 있다. (특정 조건이 만족하면 뒤에 연산을 할 필요 없음)
+
+### 5.4.3 요소 검색
+- findAny 메서드는 현재 스트림에서 임의의 요소를 반환한다.
+- findAny 메서드를 다른 스트림 연산관 연결해서 사용할 수 있다.
+> filter와 findAny를 이용한 채식요리 선택
+```java
+  Optional<Dish> dish =
+        menu.stream()
+        .filter(Dish::isVegetarian) 
+        .findAny(); // 이게 Optional을 반환하는지 ? 랜덤으로 선택되는지?
+```
+
+### Optional이란?
+- Optional<T> 클래스(java.util.Optional)는 값의 존재나 부재 여부를 표한하는 컨테이너 클래스다.
+- 위 예제의 findAny는 아무 요소도 반환하지 않을 수 있음(menu 리스트에 채식주의자가 없을 수 있음) => nul은 쉽게 에러를 일으킬 수 있으므로 자바 8 라이브러리 설계자는 Optional<T>를 만들었다.
+- Optional은 값이 존재하는지 확인하고 값이 없을 때 어떻게 처리할지 강제하는 기능을 제공한다.
+```java
+ ifPresent() : Optional이 값을 포함하면 참(true), 포함하지 않으면(null 일 경우 거짓(false)를 반환한다.
+ ifPresent(Consumer<T> block)은 값이 있으면 주어진 블록을 실행한다.
+ T get()은 값이 존재하면 값을 반환하고, 값이 없으면 NoSuchElementException을 일으킨다.
+ T orElse(T other)는 값이 있으면 반환하고, 없으면 기본값을 반환한다.
+```
+
+```java
+menu.stream()
+    .filter(Dish::isVegetarian)
+    .findAny() // Optional<Dish> 반환
+    .ifPresent(dish -> System.out.println(dish.getName()); // 값이 있으면 출력, 없으면 아무일도 발생 안함
+```
+
+### 5.4.4 첫 번째 요소 찾기
+- findFirst를 사용
+- 숫자 리스트에서 3으로 나누어떨어지는 첫 번째 제곱값을 반환
+```java
+List<Integer> someNumbers = Arrays.asList(1, 2, 3, 4, 5);
+Optional<Integer> firstSquareDivisibleByThree =
+                  someNumbers.stream()
+                  .map(n -> n*n)
+                  .filter(n -> n % 3 == 0)
+                  .findFirst(); // 9  
+```
+
+## 5.5 리듀싱
+- **리듀싱 연산** : 모든 스트림 요소를 처리해서 값으로 도출하는 연산 (**폴드**라고도 부름)
+
+### 5.5.1 요소의 합
+- for-each 루프를 이용해 리스트의 숫자 요소를 더하는 코드
+```java
+  int sum = 0;
+  for (int x : numbers) {
+    sum += x;
+  }
+```
+
+- reduce 연산을 이용해 반복되는 패턴을 추상화 할 수 있다.
+> 더하기
+```java
+ int sum = numbers.stream().reduce(0, (a, b) -> a + b);
+```
+
+> 곱하기
+```java
+ int sum = numbers.stream().reduce(1, (a, b) -> a * b);
+ ```
+- p 171 그림 5-7 설명 (스트림이 하나의 값으로 줄어들 때 까지 람다는 각 요소를 반복해서 조합한다.)
+
+- 메서드 참조를 통해 더 간결한 코드 작성
+```java
+int sum = numbers.stream().reduce(0, Integer::sum);
+```
+
+### 초깃값 없음
+ - 초깃값을 받지 않도록 오버로드된 reduce도 있다. 그러나 이 reduce는 Optional 객체를 반환한다.
+ ```java
+ Optional<Integer> sum = numbers.stream().reduce((a, b) -> (a + b));
+ ```
+- 초깃값이 없을 경우 합계를 반환할 수 없기때문에 Optional을 return 값으로 받는다.
+
+
+### 최댓값과 최솟값
+- 최댓값과 최솟값을 찾을 때도 reduce를 활용할 수 있다.
+
+```java
+Optional<Integer> max = numbers.stream().reduce(Integer::max); // 최대값
+Optional<Integer> min = numbers.stream().reduce(Integer::min); // 최소값
+Optional<Integer> min = numbers.stream().reduce((x, y) -> x < y ? x : y); // 최소값
+```
+
+> 퀴즈 5-3 리듀스
+> > map과 reduce 메서드를 이용해서 스트림의 요리 갯수 출력
+```java
+//각 Dish의 요소를 1로 매핑한 다음 매핑된 값을 모두 더한다.
+
+int count = menu.stream()
+            .map(dish -> 1)
+            reduce(0, Integer::sum);
+
+long count = menu.stream().count();
+```
+
+> reduce 메서드의 장점과 병렬화
+
+> 스트림 연산 : 상태 없음과 상태 있음(다시 확인)
+
+
+
+
+
+
+
