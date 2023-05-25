@@ -44,3 +44,4 @@
 |3장(2)|2023.4.29|[람다 표현식](https://github.com/tdronnie/Modern_Java_In_Action/blob/main/%EC%9D%B4%EC%84%B8%EC%9D%80/3%EC%9E%A5_%EB%9E%8C%EB%8B%A4_%ED%91%9C%ED%98%84%EC%8B%9D%232.md)|[tdronnie](https://github.com/tdronnie)|1. 메서드참조 수준의 추상화에서 성능이슈?<br> 2. 기존 객체의 인스턴스 메서드참조 이해하기<br> 3. 생성자 참조시 어떻게 new키워드로만 가능할까?|
 |4장|2023.5.6|[스트림 소개](https://github.com/1o18z/Modern_Java_In_Action/blob/main/%EC%9D%B4%EC%84%B8%EC%9D%80/4%EC%9E%A5_%EC%8A%A4%ED%8A%B8%EB%A6%BC_%EC%86%8C%EA%B0%9C.md)|[tdronnie](https://github.com/tdronnie)|-|
 |5장(1)|2023.5.13|[스트림 활용](https://github.com/1o18z/Modern_Java_In_Action/blob/main/%EA%B9%80%EB%8F%84%ED%98%84/%EA%B9%80%EB%8F%84%ED%98%84_5%EC%9E%A5.md)|[destitutor](https://github.com/destitutor)|1. 순차 스트림을 쓰면 좋을지 병렬 스트림을 쓰면 좋을지 마땅한 구분 기준? <br> 2. findAny 동작 순서?|
+|5장(2)|2023.5.20|스트림 활용|[kma952727](https://github.com/kma952727)|-|
